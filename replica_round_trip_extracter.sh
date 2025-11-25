@@ -210,36 +210,38 @@ if [ ${histo_flag} -eq 1 ]; then
         bin_count=${hist[${i}]}
         # Scale probability to max_height
         height=$(echo "${bin_count} * ${max_height} / ${max_prob} / ${sum}" | bc -l)
-	# Convert to integer to always have integer number of characters 
+	    # Convert to integer to always have integer number of characters 
         height=${height%.*}
         # Prepare string with bin centers
-	bin_center=$(echo "${min}+${bin_width}*(${i} + 0.5)" | bc -l)
-	str1=$(printf "| %6.3f |" ${bin_center})
-	# Prepare string with counts
-	str2=$(printf "%5g  |" ${bin_count})
-	# Prepare string with probabilities
-	str3=$(printf "  %4.1f |" $(echo "${bin_count} / ${sum} * 100" | bc -l))
-	# Prepare string with histogram
-	str4=$(printf " %s\n" "$(printf 'x%.0s' $(seq 1 ${height}))")
+	    bin_center=$(echo "${min}+${bin_width}*(${i} + 0.5)" | bc -l)
+	    str1=$(printf "| %6.3f |" ${bin_center})
+	    # Prepare string with counts
+	    str2=$(printf "%5g  |" ${bin_count})
+	    # Prepare string with probabilities
+	    str3=$(printf "  %4.1f |" $(echo "${bin_count} / ${sum} * 100" | bc -l))
+	    # Prepare string with histogram
+	    str4=$(printf " %s\n" "$(printf 'x%.0s' $(seq 1 ${height}))")
         # Full string
         full_string="${str1}${str2}${str3}${str4}"
-	# report average
-	if [ ${i} -eq ${ave_bin} ]; then
-	    padded_string=$(printf "%-${ave_pos}s" "${full_string}")
-	    full_string="${padded_string} < Average"
-	fi
-	# report std dev
-	if { [[ ${i} -eq ${std_bin_m} ]] || [[ ${i} -eq ${std_bin_p} ]]; } && [[ ${do_std} -eq 1 ]]; then
+	    # report average
+	    if [ ${i} -eq ${ave_bin} ]; then
+	        padded_string=$(printf "%-${ave_pos}s" "${full_string}")
+	        full_string="${padded_string} < Average"
+	    fi
+	    # report std dev
+        if [[ ( $i -eq $std_bin_m || $i -eq $std_bin_p ) && $do_std -eq 1 ]]; then
             padded_string=$(printf "%-${ave_pos}s" "${full_string}")
             full_string="${padded_string} *"
         fi
         # report std dev bars
-        if { [[ ${i} -gt ${std_bin_m} ]] && [[ ${i} -lt ${std_bin_p} ]] && [[ ${i} -ne ${ave_bin} ]] && [[ ${do_std} -eq 1 ]] }; then
-            padded_string=$(printf "%-${ave_pos}s" "${full_string}")
-            full_string="${padded_string} |"
+        if [ ${i} -gt ${std_bin_m} ] && \
+	       [ ${i} -lt ${std_bin_p} ] && \
+	       [ ${i} -ne ${ave_bin} ]   && \
+	       [ ${do_std} -eq 1 ]; then
+	           padded_string=$(printf "%-${ave_pos}s" "${full_string}")
+		       full_string="${padded_string} |"
         fi
-	echo "${full_string}"
+	    echo "${full_string}"
     done
 fi
-
 exit;
